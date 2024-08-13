@@ -19,3 +19,4 @@ app.use(cors());
 app.use(express.json());
 app.use("/users", require("./routes/usersRoute"));
 app.use("/places", require("./routes/placesRoute"));
+app.use("/events", require("./routes/eventsRoute"));
