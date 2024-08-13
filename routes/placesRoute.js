@@ -1,4 +1,5 @@
 const express = require("express");
+const uploadMiddleware = require("../middleware/uploadMiddleware");
 const router = express.Router();
 const {
   getAllPlaces,
@@ -16,21 +17,22 @@ router.route("/").get(getAllPlaces);
 // desc @create places
 // route @POST /places
 // access-level @admin, superadmin
-router.route("/").post();
+
+router.route("/").post(uploadMiddleware.single("image"), createPlace);
 
 // desc @get a place
 // route @GET /places/:id
 // access-level @user,superAdmin
-router.route("/:id").get();
+router.route("/:id").get(getPlacesById);
 
 // desc @update a place
 // route @PUT /places/:id
 // access-level @admin, superAdmin
-router.route("/:id").put();
+router.route("/:id").put(updatePlace);
 
 // desc @delete a place
 // route @DELETE /places/:id
 // access-level @admin, superAdmin
-router.route("/:id").delete();
+router.route("/:id").delete(deletePlace);
 
 module.exports = router;

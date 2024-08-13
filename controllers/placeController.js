@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Place = require("../models/placesModel");
+const cloudinary = require("cloudinary");
 
 // GET /places
 const getAllPlaces = asyncHandler(async (req, res) => {
@@ -31,11 +32,20 @@ const getPlacesById = async (req, res) => {
 const createPlace = async (req, res) => {
   try {
     const { name, category, priceRange } = req.body;
+    const image = req.file;
+
+    //Store the uploaded image on cloudinary
+    const result = await cloudinary.uploader.upload(image.path);
+    const image_url = result.secure_url;
+
+    //Store the uploaded info on db
     const place = await Place.create({
       name,
       category,
       priceRange,
+      image: image_url,
     });
+
     res.status(201).json(place);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
