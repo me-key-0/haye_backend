@@ -4,8 +4,6 @@ const { usersRoute } = require("./routes/usersRoute");
 const cors = require("cors");
 require("dotenv").config();
 const cloudinary = require("cloudinary");
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,7 +15,7 @@ const app = express();
 const connectDb = require("./config/db");
 app.use(cookieParser());
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3030;
 
 const server = app.listen(port, () => {
   console.log(`The server is running on port ${port}`);

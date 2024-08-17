@@ -56,7 +56,7 @@ const createUser = async (req, res) => {
     //register/create a user
     console.log("creating...");
     const user = await User.create({
-      username: username,
+      username,
       email,
       password: hashedPassword,
       city,
@@ -118,10 +118,10 @@ const deleteUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   const { error } = loginSchema.validate({
-    username,
+    email,
     password,
   });
 
@@ -134,7 +134,7 @@ const loginUser = async (req, res) => {
 
   try {
     //Check if the user exist
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -251,9 +251,9 @@ const updatePassword = async (req, res) => {
 };
 
 const isUser = async (req, res, next) => {
-  // console.log(res.locals.user);
+  console.log(req.body.email);
   const user = await User.findOne({
-    username: req.body.username,
+    email: req.body.email,
   });
   console.log(req.body);
   if (user && user.role === "user") {
@@ -477,7 +477,7 @@ const verifyEmail = async (req, res) => {
         from: process.env.SMTP_USERNAME, // sender address
         to: email, // receiver address
         subject: "Verify Email ✔", // Subject line
-        text: `Email Verification?`, // plain text body
+        text: `Email Verification`, // plain text body
         html: `<button><b><a href="${registrationLink}">Verify-Email<a/></b></button>
         <p>${registrationLink}</p>`, // html body
       },

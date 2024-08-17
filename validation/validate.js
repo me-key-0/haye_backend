@@ -34,7 +34,7 @@ const userRegistrationSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  username: Joi.string().min(3).max(30).required().messages({
+  email: Joi.string().min(3).max(30).required().messages({
     "string.base": "Username should be a type of text",
     "string.empty": "Username cannot be an empty field",
     "string.min": "Username should have a minimum length of {#limit}",
