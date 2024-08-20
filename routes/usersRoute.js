@@ -27,7 +27,7 @@ router.route("/userhome").get(validateToken, isUser, currentUser);
 // route @POST /users
 // access-level @user, superadmin
 router.route("/register").post(verifyEmail);
-router.route("/register-verified/:token").post(createUser);
+router.route("/register-user").post(createUser);
 
 // desc @login a User
 // route @POST /users/login

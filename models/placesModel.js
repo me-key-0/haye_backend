@@ -34,21 +34,6 @@ const placeSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    reviews: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        rating: {
-          type: Number,
-          required: true,
-        },
-        comment: {
-          type: String,
-        },
-      },
-    ],
   },
   {
     timestamps: true,

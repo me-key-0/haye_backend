@@ -1,4 +1,5 @@
 const User = require("../models/usersModel");
+const Code = require("../models/verificationCode");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -36,18 +37,37 @@ const getUserById = async (req, res) => {
 
 // POST /users
 const createUser = async (req, res) => {
-  const token = req.params.token;
-  if (!token) {
-    return res.status(401).json({
-      message: "token is missing",
-    });
-  }
-
-  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  console.log(decoded);
+  const { code } = req.body;
+  console.log(code);
   try {
-    const { username, password, email, city } = decoded;
-    console.log(username);
+    if (!req.cookies && !req.cookies.Token) {
+      res.status(401).json({ message: "Cookie missing" });
+    }
+
+    console.log(req.cookies);
+
+    const decoded = jwt.verify(
+      req.cookies.Token,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+
+    const { username, email, password } = decoded;
+
+    const verify = await Code.findOne({ email });
+
+    if (verify.code != code) {
+      res.status(400).json({
+        message: "Incorrect code!",
+      });
+    }
+
+    // Calculate expiration time (adjust expiration time as needed)
+    const expirationTime = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+    // Check if code has expired
+    if (Date.now() - verify.createdAt.getTime() > expirationTime) {
+      return res.status(400).json({ message: "Code expired" });
+    }
 
     //Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -59,11 +79,11 @@ const createUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      city,
     });
     console.log("user");
 
     if (user) {
+      await Code.deleteOne({ email });
       res.status(201).json({
         message: "User registered Successfully",
         id: user._id,
@@ -458,8 +478,33 @@ const verifyEmail = async (req, res) => {
       }
     );
     console.log(token);
-    const registrationLink = `https://${process.env.HOST}:5173/users/register-verified/${token}`;
-    // Construct the query parameters string
+
+    // Sending access token to browser Cookie
+    res.cookie("Token", token, {
+      httpOnly: true,
+      // secure:true,
+      maxAge: 30 * 60 * 1000,
+      sameSite: "strict",
+    });
+
+    // A
+    const generateRandomNumber = () => {
+      // Generate a 6-digit random number
+      const code = Math.floor(100000 + Math.random() * 900000);
+      return code;
+    };
+
+    const code = generateRandomNumber();
+    console.log(`verification code: ${code}`);
+
+    await Code.findOneAndDelete({ email });
+    const stg = await Code.create({ email, code, token });
+    if (!stg) {
+      return res
+        .status(401)
+        .json({ message: "Generated code can not be stored" });
+    }
+    console.log("passed!");
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -471,17 +516,24 @@ const verifyEmail = async (req, res) => {
       },
     });
 
-    // Send the password reset link to the user's email
     await transporter.sendMail(
       {
         from: process.env.SMTP_USERNAME, // sender address
         to: email, // receiver address
-        subject: "Verify Email ✔", // Subject line
-        text: `Email Verification`, // plain text body
-        html: `<button><b><a href="${registrationLink}">Verify-Email<a/></b></button>
-        <p>${registrationLink}</p>`, // html body
+        subject: "Account Verification Code", // Subject line
+        text: `Your verification code is: ${code}`, // plain text body
+        html: `
+        <p>Dear ${username},</p>
+        <p>Thank you for registering with us.</p>
+        <p>Your verification code is: <strong>${code}</strong></p>
+        <p>Please enter this code to verify your email address.</p>
+        <p>This code is valid for 30 minutes.</p>
+        <p>If you did not request this verification, please ignore this email.</p>
+        <p>Best regards,</p>
+        <p>Your Company Name</p>
+      `, // html body
       },
-      async (error, info) => {
+      (error, info) => {
         if (error) {
           return res.status(500).json({
             message: "Error sending email",
