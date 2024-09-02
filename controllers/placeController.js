@@ -8,7 +8,7 @@ const getAllPlaces = asyncHandler(async (req, res) => {
     const places = await Place.find();
     res.json(places);
   } catch (error) {
-    res.status(500).json({ error: "g Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -88,6 +88,8 @@ const deletePlace = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+const handleExplore = async () => {};
 
 module.exports = {
   getAllPlaces,
