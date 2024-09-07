@@ -23,7 +23,7 @@ const server = app.listen(port, () => {
 connectDb();
 app.use(
   cors({
-    origin: "https://hayeplaces.vercel.app/",
+    origin: "https://hayeplaces.vercel.app",
   })
 );
 app.use(express.json());
