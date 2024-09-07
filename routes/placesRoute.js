@@ -7,6 +7,8 @@ const {
   createPlace,
   updatePlace,
   deletePlace,
+  handleHome,
+  exploreP,
 } = require("../controllers/placeController");
 
 // desc @get All places
@@ -19,6 +21,8 @@ router.route("/").get(getAllPlaces);
 // access-level @admin, superadmin
 
 router.route("/").post(uploadMiddleware.single("image"), createPlace);
+
+router.route("/home").get(handleHome);
 
 // desc @get a place
 // route @GET /places/:id
@@ -34,5 +38,7 @@ router.route("/:id").put(updatePlace);
 // route @DELETE /places/:id
 // access-level @admin, superAdmin
 router.route("/:id").delete(deletePlace);
+
+// router.route("/places-p").get(placesP);
 
 module.exports = router;

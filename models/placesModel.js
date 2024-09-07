@@ -34,6 +34,10 @@ const placeSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    streets: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

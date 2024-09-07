@@ -15,10 +15,10 @@ const {
   updatePassword,
   forgetPassword,
   resetPassword,
-  // resendPasswordEmail,
   verifyEmail,
   isUser,
   isAdmin,
+  postContact,
 } = require("../controllers/userController");
 
 router.route("/userhome").get(validateToken, isUser, currentUser);
@@ -39,6 +39,8 @@ router.route("/place").get((req, res) => {
     message: "Places displayed!",
   });
 });
+
+router.route("/contact").post(postContact);
 
 // desc @login a User
 // route @POST /users/login

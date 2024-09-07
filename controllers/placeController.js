@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Place = require("../models/placesModel");
+const Event = require("../models/eventsModel");
 const cloudinary = require("cloudinary");
 
 // GET /places
@@ -36,8 +37,9 @@ const createPlace = async (req, res) => {
 
     //Store the uploaded image on cloudinary
     const result = await cloudinary.uploader.upload(image.path);
-    const image_url = result.secure_url;
 
+    const image_url = result.secure_url;
+    console.log(image_url);
     //Store the uploaded info on db
     const place = await Place.create({
       name,
@@ -89,7 +91,27 @@ const deletePlace = async (req, res) => {
   }
 };
 
-const handleExplore = async () => {};
+const handleHome = async (req, res) => {
+  const places = await Place.find();
+  const events = await Event.find();
+  const explore = [];
+  const event = [];
+  for (i of places) {
+    explore.push(i.image);
+  }
+  for (i of events) {
+    event.push(i.photo);
+  }
+  try {
+    res.json({
+      explore: explore,
+      event: event,
+      fav: explore[3],
+    });
+  } catch (error) {
+    res.json({ message: error });
+  }
+};
 
 module.exports = {
   getAllPlaces,
@@ -97,4 +119,5 @@ module.exports = {
   createPlace,
   updatePlace,
   deletePlace,
+  handleHome,
 };

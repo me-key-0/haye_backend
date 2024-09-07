@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
       ref: "Place",
     },
   ],
-  city: {
+  street: {
     type: String,
   },
   // emailVerified: {

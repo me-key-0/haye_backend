@@ -23,13 +23,11 @@ const server = app.listen(port, () => {
 connectDb();
 app.use(
   cors({
-    origin: "https://hayeplaces.vercel.app/",
+    origin: "http://localhost:5173",
   })
 );
 app.use(express.json());
 app.use("/users", require("./routes/usersRoute"));
 app.use("/places", require("./routes/placesRoute"));
 app.use("/events", require("./routes/eventsRoute"));
-app.use('/api', require('./routes/reviewRoutes'));
-
-
+app.use("/api", require("./routes/reviewRoute"));

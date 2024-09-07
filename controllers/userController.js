@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer");
 const {
   userRegistrationSchema,
   loginSchema,
+  contactSchema,
 } = require("../validation/validate");
 
 // GET /users
@@ -177,7 +178,7 @@ const loginUser = async (req, res) => {
       // Sending access token to browser Cookie
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        // secure:true,
+        // secure: false,
         maxAge: 25 * 60 * 1000,
         sameSite: "strict",
       });
@@ -208,12 +209,13 @@ const loginUser = async (req, res) => {
       // Sending refresh token to browser Cookie
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        // secure:true;
+        // secure: false,
         maxAge: 15 * 24 * 60 * 60 * 1000,
         sameSite: "strict",
       });
 
       res.status(200).json({
+        user: user,
         message: "User logged in successfully!",
       });
     } else {
@@ -487,7 +489,6 @@ const verifyEmail = async (req, res) => {
       sameSite: "strict",
     });
 
-    // A
     const generateRandomNumber = () => {
       // Generate a 6-digit random number
       const code = Math.floor(100000 + Math.random() * 900000);
@@ -554,6 +555,65 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const postContact = async (req, res) => {
+  const { username, email, message } = req.body;
+
+  const { error } = contactSchema.validate({ username, email });
+  if (error) {
+    return res.status(400).json({
+      message: "Validation failed",
+      details: error.details[0].message,
+    });
+  }
+
+  try {
+    // Check if user already registered, and throw an error
+    const userAvailable = await User.findOne({
+      email,
+    });
+    if (!userAvailable) {
+      res.status(401).json({
+        message: "Register to send message",
+      });
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail(
+      {
+        from: email, // sender address
+        to: process.env.SMTP_USERNAME, // receiver address
+        subject: `Message from ${username} to Haye.org`, // Subject line
+        // text: ``, // plain text body
+        html: `
+        <P>${message}</p>
+      `, // html body
+      },
+      (error, info) => {
+        if (error) {
+          return res.status(500).json({
+            message: "Error sending email",
+            error,
+          });
+        }
+
+        console.log("Contact email sent!");
+        res.status(200).json({
+          message: "Contact email sent!",
+        });
+      }
+    );
+  } catch (error) {}
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -570,4 +630,5 @@ module.exports = {
   verifyEmail,
   isUser,
   isAdmin,
+  postContact,
 };
