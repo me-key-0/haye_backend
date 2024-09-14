@@ -180,7 +180,7 @@ const loginUser = async (req, res) => {
         httpOnly: true,
         // secure: false,
         maxAge: 25 * 60 * 1000,
-        sameSite: "strict",
+        sameSite: "None",
       });
 
       // Refresh token generation
@@ -211,7 +211,7 @@ const loginUser = async (req, res) => {
         httpOnly: true,
         // secure: false,
         maxAge: 15 * 24 * 60 * 60 * 1000,
-        sameSite: "strict",
+        sameSite: "None",
       });
 
       res.status(200).json({
