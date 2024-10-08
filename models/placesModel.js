@@ -1,3 +1,4 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
 
 const placeSchema = new mongoose.Schema(
@@ -8,6 +9,10 @@ const placeSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      required: true,
+    },
+    rating:{
+      type: Number,
       required: true,
     },
     category: {

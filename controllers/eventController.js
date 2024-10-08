@@ -1,13 +1,13 @@
-const asyncHandler = require("express-async-handler");
 const Event = require("../models/eventsModel");
 const cloudinary = require('cloudinary');
+
 // List all events
 const getAllEvents = async (req, res) => {
   try {
     const events = await Event.find();
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json(error);
   }
 };
 
@@ -31,8 +31,7 @@ const getEventById = async (req, res) => {
 const createEvent = async (req, res) => {
   try {
     const { Name } = req.body;
-    const photo = req.file;
-    console.log('starting')
+    const photo = req.file;    
     console.log(photo.path);
 
     // Store the uploaded image on cloudinary
@@ -48,7 +47,9 @@ const createEvent = async (req, res) => {
       photo:image_url
     });
 
-    res.status(200).json(event);
+    res.status(200).json({
+      message:"Event successfully registered!"
+    });
   } catch (err) {
     res.status(500).json({ error: err });
   }
@@ -76,7 +77,7 @@ const deleteEvent = async (req, res) => {
   try {
     const deletedEvent = await Event.findByIdAndDelete(req.params.id);
     if (deletedEvent) {
-      res.status(204).json({ message: "Event deleted" });
+      res.status(200).json({ message: "Event deleted" });
     } else {
       res.status(404).json({ error: "Event not found" });
     }
@@ -85,10 +86,43 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const scheduleHanlde = async (req, res) => {
+  const {event, date} = req.body;
+  try {
+    const Schedule = await Schedule.create(
+      {
+        event,
+        date
+      }
+    )
+    res.status(200).json({
+      message:"Event Scheduled Sucessfully"
+    })
+  } catch (error) {
+    res.status(500).json({
+      message:"Internal server error"
+    })
+  }
+}
+
+const deleteEvents = async (req,res) => {
+  try {
+    await Event.deleteMany()
+    res.status(200).json({
+      message:"All Deleted!"
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({mesage:"Internal server error"})
+  }
+}
+
 module.exports = {
   getAllEvents,
   getEventById,
   createEvent,
   updateEvent,
   deleteEvent,
+  scheduleHanlde,
+  deleteEvents
 };
